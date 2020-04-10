@@ -1,6 +1,12 @@
 #!/usr/bin/python
 
+# Python default modules import
+
 import os
+import smtplib
+
+# Webdriver imports
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
@@ -134,20 +140,67 @@ def getAmazonItem(item, webDriver):
 
     return results
 
-# driver.get('https://ebay.com')
+def format_item(itemInfo):
+    """Formats iteminfo into a string
 
-if __name__ == "__main__":
-    webDriver = getWebDriver()
+    Args: 
+        itemInfo: Dictionary containing list of related items
 
-    if webDriver != None: 
-        amazonQuery = getAmazonItem('nike shoes', webDriver) 
+    Return:
+        strFormat: Formated string of relate items
+
+    """
+    strFormat = ''
+    for key,value in itemInfo.items():
+        strFormat += f'{key + 1}\n' 
+
+        for itemKey, itemValue in value.items(): 
+            strFormat += f'{itemKey} : {itemValue}\n'
+
+        strFormat += '\n\n'
+    
+    return strFormat
+
+def send_email(receiver, messageSub, messageBody):
+    """Sends 
+
+    Args:
+        receiver: email of receiver
+        messageBody: email body
+
+    Return:
+        None
+
+    """
 
     SENDER_EMAIL = os.getenv('SENDER_EMAIL') 
     SENDER_PASSWORD = os.getenv('SENDER_PASSWORD') 
 
     if SENDER_EMAIL and SENDER_PASSWORD: # Checking that environment variables are set
+        print('Sending Email....')
+        with smtplib.SMTP('smtp-mail.outlook.com', 587) as smtp:
+            # Encryption and login to outlook smtp-mail server
 
-    print(amazonQuery)
+            smtp.starttls()
+            smtp.login(SENDER_EMAIL, SENDER_PASSWORD)
+
+            message = f"Subject: {messageSub} \n\n {messageBody}"
+            smtp.sendmail('dominichenrywork@hotmail.com', receiver, message.encode('utf-8'))
+
+    else:
+       print("Email not sent! Set SENDER email environment variables")
+
+if __name__ == "__main__":
+    webDriver = getWebDriver()
+    itemQuery = 'Samsung Remote UN49J5200AF'
+
+    if webDriver != None: 
+        print('Querying Amazon....')
+        amazonQuery = getAmazonItem(itemQuery, webDriver) 
+
     webDriver.close()
-    print("Finished!")
 
+    formattedQuery = format_item(amazonQuery)
+    send_email('dominichenrywork@hotmail.com', itemQuery, formattedQuery)
+
+    print("Finished!")

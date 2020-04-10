@@ -139,6 +139,10 @@ if __name__ == "__main__":
     if webDriver != None: 
         amazonQuery = getAmazonItem('nike shoes', webDriver) 
 
+    SENDER_EMAIL = os.getenv('SENDER_EMAIL') 
+    SENDER_PASSWORD = os.getenv('SENDER_PASSWORD') 
+
+    if SENDER_EMAIL and SENDER_PASSWORD: # Checking that environment variables are set
 
     print(amazonQuery)
     webDriver.close()

@@ -61,8 +61,11 @@ def amazonItemStrip(itemInfo):
     if 'More Buying Choices' in itemInfoList:
         indexOfBuyingChoices = itemInfoList.index('More Buying Choices') # Index to delete irrelevant information
 
+    if indexOfBuyingChoices > 0: 
+        itemInfoList = itemInfoList[:indexOfBuyingChoices + 1]
+
     filterOut = ['Amazon\'s Choice', 'Best Seller', 'More Buying Choices']
-    itemInfoList = list(filter(lambda x: not x in filterOut, itemInfoList))[indexOfBuyingChoices:]
+    itemInfoList = list(filter(lambda x: x not in filterOut, itemInfoList))
 
     stripedInfo = [itemInfoList[0]] + list(filter(lambda x: x.startswith('$'), itemInfoList))
 

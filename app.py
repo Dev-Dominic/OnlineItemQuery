@@ -140,6 +140,38 @@ def getAmazonItem(item, webDriver):
 
     return results
 
+def getEbayItem(item, webDriver):
+    """Queries ebay's website for an item
+
+    Args:
+        item: Name of item to query 
+        webDriver: selenium google webdriver object
+
+    Return: 
+        Dict mapping search results index with each 
+        result's information.
+
+       results:  
+       {
+            '0' : 
+            {
+                'title' : 'Vagabond, Vol. 1 (VIZBIG Edition)',
+                'price' : $10
+                'URL'   : <amazon resource url>
+            },
+            '1' : 
+            {
+                'title' : 'Vagabond, Vol. 2 (VIZBIG Edition)',
+                'price' : $10
+                'URL'   : <amazon resource url>
+            } 
+        }
+
+    """
+
+    webDriver.get('https://www.ebay.com')
+
+
 def format_item(itemInfo):
     """Formats iteminfo into a string
 

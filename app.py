@@ -26,20 +26,21 @@ def getWebDriver():
         driver: Returns a google webdriver object or none if chromedriver path is not set
 
     """
-    chromeDrivePath = os.getenv('CHROMEDRIVERPATH') 
+    driver_path = os.getenv('CHROMEDRIVERPATH') 
+    browser_path = os.getenv('SELENIUM_BROWSER_PATH')
     driver = None
 
-    if chromeDrivePath == None:
-        print("Error: ChromeDriver path not set!")
+    if not(driver_path or browser_path):
+        print("Error: WebDriver path or Browser Path not set!")
         return None
 
-    chromeOptions = Options()
-    chromeOptions.add_argument('--headless')
-    chromeOptions.add_argument('--log-level=3')
-    chromeOptions.add_argument("--window-size=1920x1080")
+    webDriverOptions = Options()
+    webDriverOptions.binary_location = browser_path
+    webDriverOptions.add_argument('--headless')
+    webDriverOptions.add_argument('--log-level=3')
+    webDriverOptions.add_argument("--window-size=1920x1080")
 
-    driver = webdriver.Chrome(chromeDrivePath, options=chromeOptions)
-
+    driver = webdriver.Chrome(driver_path, options=webDriverOptions)
     return driver
 
 def amazonItemStrip(itemInfo):
@@ -229,10 +230,9 @@ if __name__ == "__main__":
     if webDriver != None: 
         print('Querying Amazon....')
         amazonQuery = getAmazonItem(itemQuery, webDriver) 
-
-    webDriver.close()
-
-    formattedQuery = format_item(amazonQuery)
-    send_email('dominichenrywork@hotmail.com', itemQuery, formattedQuery)
+        print(amazonQuery)
+        # formattedQuery = format_item(amazonQuery)
+        # send_email('dominichenrywork@hotmail.com', itemQuery, formattedQuery)
+        webDriver.close()
 
     print("Finished!")

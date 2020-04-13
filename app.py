@@ -171,7 +171,11 @@ def getEbayItem(item, webDriver):
     """
 
     webDriver.get('https://www.ebay.com')
+    searchBox = webDriver.find_element_by_id("gh-ac")
+    searchBox.send_keys(item)
+    searchBox.send_keys(Keys.RETURN)
 
+    print(webDriver.title)
 
 def format_item(itemInfo):
     """Formats iteminfo into a string

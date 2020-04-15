@@ -12,6 +12,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
 noRESULTS = 5 # Results retrieved per website
+LABELS = ['title', 'price', 'URL']
 
 def getWebDriver():
     """Setups up google webdriver
@@ -116,7 +117,6 @@ def getAmazonItem(item, webDriver):
     searchBox.send_keys(Keys.RETURN)
 
     results = {}
-    resultsSubLabels = ['title', 'price', 'URL']
 
     # resultXpath      : Using xpath to get each resulting element 
     # resultLinkXpath  : Using xpath to get each resulting element URL link
@@ -135,7 +135,7 @@ def getAmazonItem(item, webDriver):
             itemIndex += 1
             continue
 
-        results[index] = dict(zip(resultsSubLabels,resultValue))
+        results[index] = dict(zip(LABELS,resultValue))
         index += 1
         itemIndex += 1
 
@@ -175,26 +175,48 @@ def getEbayItem(item, webDriver):
     searchBox.send_keys(item)
     searchBox.send_keys(Keys.RETURN)
 
-    print(webDriver.title)
+    results = {}
 
-def format_item(itemInfo):
+    itemTitle = webDriver.find_elements_by_class_name('s-item__title')
+    itemPrice = webDriver.find_elements_by_class_name('s-item__price')
+    itemURL = webDriver.find_elements_by_xpath('//div[@class="s-item__image"]/a')
+
+    for i in range(noRESULTS):
+
+        # Extracts an item's title, price and URL
+        # Creates item dictionary that is added to results dictionary 
+
+        resultValue = [itemTitle[i].text, itemPrice[i].text, itemURL[i].get_attribute('href')]
+        results[i] = dict(zip(LABELS,resultValue))
+
+    return results
+
+
+def email_format(*itemInfo):
     """Formats iteminfo into a string
 
     Args: 
-        itemInfo: Dictionary containing list of related items
+        itemInfo: an array of arguments from different websites
+        that is tuple format formatted as a dictionary containing list of related items
+
+        ('name of website', 'dictionary of related items')
 
     Return:
         strFormat: Formated string of relate items
 
     """
     strFormat = ''
-    for key,value in itemInfo.items():
-        strFormat += f'{key + 1}\n' 
 
-        for itemKey, itemValue in value.items(): 
-            strFormat += f'{itemKey} : {itemValue}\n'
+    for websiteQuery in itemInfo:
+        strFormat += f'{websiteQuery[0]}\n' 
 
-        strFormat += '\n\n'
+        for key,value in websiteQuery[1].items():
+            strFormat += f'{key + 1}\n' 
+
+            for itemKey, itemValue in value.items(): 
+                strFormat += f'{itemKey} : {itemValue}\n'
+
+            strFormat += '\n\n'
     
     return strFormat
 
@@ -229,14 +251,24 @@ def send_email(receiver, messageSub, messageBody):
 
 if __name__ == "__main__":
     webDriver = getWebDriver()
-    itemQuery = 'Samsung Remote UN49J5200AF'
+    # itemQuery = 'Samsung Remote UN49J5200AF'
+    itemQuery = 'Macbook'
 
     if webDriver != None: 
+
+        ## Querying each website
+
         print('Querying Amazon....')
         amazonQuery = getAmazonItem(itemQuery, webDriver) 
-        print(amazonQuery)
-        # formattedQuery = format_item(amazonQuery)
-        # send_email('dominichenrywork@hotmail.com', itemQuery, formattedQuery)
+
+        print('Querying Ebay....')
+        ebayQuery = getEbayItem(itemQuery, webDriver)
+
+        # Formatting information for email
+
+        strFormat = email_format(('Amazon', amazonQuery), ('Ebay',ebayQuery)) 
+
+        send_email('dominichenrywork@hotmail.com', itemQuery, strFormat)
         webDriver.close()
 
     print("Finished!")

@@ -3,6 +3,7 @@
 # Python default modules import
 
 import os
+import sys
 import smtplib
 
 # Webdriver imports
@@ -250,9 +251,13 @@ def send_email(receiver, messageSub, messageBody):
        print("Email not sent! Set SENDER email environment variables")
 
 if __name__ == "__main__":
-    webDriver = getWebDriver()
-    # itemQuery = 'Samsung Remote UN49J5200AF'
-    itemQuery = 'Macbook'
+    # Retrieve commandline arguments:
+    # $ python app.py <query-item> <receiver-email>
+
+    itemQuery, receiver_email = sys.argv[1], sys.argv[2]
+
+
+    webDriver = getWebDriver() # webDriver init
 
     if webDriver != None: 
 
@@ -268,7 +273,7 @@ if __name__ == "__main__":
 
         strFormat = email_format(('Amazon', amazonQuery), ('Ebay',ebayQuery)) 
 
-        send_email('dominichenrywork@hotmail.com', itemQuery, strFormat)
+        send_email(receiver_email, itemQuery, strFormat)
         webDriver.close()
 
     print("Finished!")

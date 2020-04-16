@@ -2,19 +2,51 @@
 
 Queries for a specific item on Amazon and Ebay and returns result via email. 
 
-## What is done
+## External Dependencies
 
-1. Navigate to retailer's website
-2. Search for a given item
-3. Filter for 4 and 5 star products
-4. Sort by price (low to high)
-5. Get first 5 item details
-    - Item full name
-    - Price
-    - item URL
-6. Compile item details into readable text
-7. Email text to a given email
+- Selenium
 
-## Dependencies 
+- chromedriver
 
-* Selenium
+- Valid chromium based webbrowser
+
+## Setup
+
+### Linux/Mac OS
+
+Creation of virtual environment and installation of dependencies.
+
+```bash
+
+$ python -m venv venv 
+
+$ source venv/bin/activate
+
+$ pip install -r requirements.txt
+
+```
+
+### Windows 
+Creating and entering virutal environment
+
+```bash
+
+$ python -m venv venv 
+
+$ venv\Scripts\activate
+
+$ pip install -r requirements.txt
+
+```
+
+### Environment variables 
+
+- SENDER_EMAIL: email to be used to send query respones  
+
+- SENDER_PASSWORD: SENDER_EMAIL password 
+
+- CHROMEDRIVERPATH: path to chromedriver
+
+- SELENIUM_BROWSER_PATH: path to chromium based browser
+
+**Note:** Ensure that the versions for the chromium based browser matches your chromedriver

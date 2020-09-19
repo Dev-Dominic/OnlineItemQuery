@@ -1,6 +1,6 @@
 # Online Item Query
 
-Queries for a specific item on Amazon and Ebay and returns result via email. 
+Queries for a specific item on Amazon and Ebay and returns result via email.
 
 ## External Dependencies
 
@@ -18,7 +18,7 @@ Creation of virtual environment and installation of dependencies.
 
 ```bash
 
-$ python -m venv venv 
+$ python -m venv venv
 
 $ source venv/bin/activate
 
@@ -26,12 +26,12 @@ $ pip install -r requirements.txt
 
 ```
 
-### Windows 
+### Windows
 Creating and entering virutal environment
 
 ```bash
 
-$ python -m venv venv 
+$ python -m venv venv
 
 $ venv\Scripts\activate
 
@@ -39,11 +39,11 @@ $ pip install -r requirements.txt
 
 ```
 
-### Environment variables 
+### Environment variables
 
-- SENDER_EMAIL: email to be used to send query respones  
+- SENDER_EMAIL: email to be used to send query responses
 
-- SENDER_PASSWORD: SENDER_EMAIL password 
+- SENDER_PASSWORD: SENDER_EMAIL password
 
 - CHROMEDRIVERPATH: path to chromedriver
 

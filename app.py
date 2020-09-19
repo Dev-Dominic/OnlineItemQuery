@@ -12,14 +12,14 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
-noRESULTS = 5 # Results retrieved per website
+RESULTS_LIMIT = 5 # Results retrieved per website
 LABELS = ['title', 'price', 'URL']
 
 def getWebDriver():
     """Setups up google webdriver
 
     Webdriver contains headless option(does not run a physical window),
-    as well as suppresses commandline log messages that are not critical. 
+    as well as suppresses commandline log messages that are not critical.
 
     Args:
         None
@@ -28,7 +28,7 @@ def getWebDriver():
         driver: Returns a google webdriver object or none if chromedriver path is not set
 
     """
-    driver_path = os.getenv('CHROMEDRIVERPATH') 
+    driver_path = os.getenv('CHROMEDRIVERPATH')
     browser_path = os.getenv('SELENIUM_BROWSER_PATH')
     driver = None
 
@@ -39,10 +39,15 @@ def getWebDriver():
     webDriverOptions = Options()
     webDriverOptions.binary_location = browser_path
     webDriverOptions.add_argument('--headless')
-    webDriverOptions.add_argument('--log-level=3')
-    webDriverOptions.add_argument("--window-size=1920x1080")
+    # webDriverOptions.add_argument('--no-sandbox')
+    # webDriverOptions.add_argument('--remote-debugging-port=9222')
+    # webDriverOptions.add_argument('--disable-dev-shm-usage')
+    # webDriverOptions.add_argument('--log-level=3')
+    # webDriverOptions.add_argument('start-maximized')
+    # webDriverOptions.add_argument("--window-size=1920x1080")
 
     driver = webdriver.Chrome(driver_path, options=webDriverOptions)
+    # driver = webdriver.Chrome(driver_path)
     return driver
 
 def amazonItemStrip(itemInfo):
@@ -59,18 +64,20 @@ def amazonItemStrip(itemInfo):
     Args:
         itemInfo: string containing item information
 
-    Return: 
+    Return:
         stripedInfo: list containg only relvant item info
 
     """
-   
-    itemInfoList = itemInfo.split('\n') 
-    indexOfBuyingChoices = 0 
+
+    itemInfoList = itemInfo.split('\n')
+    indexOfBuyingChoices = 0
 
     if 'More Buying Choices' in itemInfoList:
-        indexOfBuyingChoices = itemInfoList.index('More Buying Choices') # Index to delete irrelevant information
+        # Index to delete irrelevant information
 
-    if indexOfBuyingChoices > 0: 
+        indexOfBuyingChoices = itemInfoList.index('More Buying Choices')
+
+    if indexOfBuyingChoices > 0:
         itemInfoList = itemInfoList[:indexOfBuyingChoices + 1]
 
     filterOut = ['Amazon\'s Choice', 'Best Seller', 'More Buying Choices']
@@ -87,27 +94,27 @@ def getAmazonItem(item, webDriver):
     """Queries amanzon's website for an item
 
     Args:
-        item: Name of item to query 
+        item: Name of item to query
         webDriver: selenium google webdriver object
 
-    Return: 
-        Dict mapping search results index with each 
+    Return:
+        Dict mapping search results index with each
         result's information.
 
-       results:  
+       results:
        {
-            '0' : 
+            '0' :
             {
                 'title' : 'Vagabond, Vol. 1 (VIZBIG Edition)',
                 'price' : $10
                 'URL'   : <amazon resource url>
             },
-            '1' : 
+            '1' :
             {
                 'title' : 'Vagabond, Vol. 2 (VIZBIG Edition)',
                 'price' : $10
                 'URL'   : <amazon resource url>
-            } 
+            }
         }
 
     """
@@ -119,16 +126,22 @@ def getAmazonItem(item, webDriver):
 
     results = {}
 
-    # resultXpath      : Using xpath to get each resulting element 
+    # resultXpath      : Using xpath to get each resulting element
     # resultLinkXpath  : Using xpath to get each resulting element URL link
 
-    resultXpath = '//div[@data-index="{}"]' 
+    resultXpath = '//div[@data-index="{}"]'
     resultLinkXpath = '//div[@data-index="{}"]//span[@data-component-type="s-product-image"]//a[1]'
-    
-    index, itemIndex = 0,0
-    while index < noRESULTS:
-        searchResults = webDriver.find_element_by_xpath(resultXpath.format(itemIndex)).text
-        searchURL = webDriver.find_element_by_xpath(resultLinkXpath.format(itemIndex))
+
+    index, itemIndex = 0,1
+    while index < RESULTS_LIMIT:
+
+        # Goes to next item if issue finding item via xpath
+        try:
+            searchResults = webDriver.find_element_by_xpath(resultXpath.format(itemIndex)).text
+            searchURL = webDriver.find_element_by_xpath(resultLinkXpath.format(itemIndex))
+        except:
+            itemIndex += 1
+            continue
 
         resultValue = amazonItemStrip(searchResults) + [searchURL.get_attribute('href')]
 
@@ -146,27 +159,27 @@ def getEbayItem(item, webDriver):
     """Queries ebay's website for an item
 
     Args:
-        item: Name of item to query 
+        item: Name of item to query
         webDriver: selenium google webdriver object
 
-    Return: 
-        Dict mapping search results index with each 
+    Return:
+        Dict mapping search results index with each
         result's information.
 
-       results:  
+       results:
        {
-            '0' : 
+            '0' :
             {
                 'title' : 'Vagabond, Vol. 1 (VIZBIG Edition)',
                 'price' : $10
                 'URL'   : <amazon resource url>
             },
-            '1' : 
+            '1' :
             {
                 'title' : 'Vagabond, Vol. 2 (VIZBIG Edition)',
                 'price' : $10
                 'URL'   : <amazon resource url>
-            } 
+            }
         }
 
     """
@@ -182,10 +195,10 @@ def getEbayItem(item, webDriver):
     itemPrice = webDriver.find_elements_by_class_name('s-item__price')
     itemURL = webDriver.find_elements_by_xpath('//div[@class="s-item__image"]/a')
 
-    for i in range(noRESULTS):
+    for i in range(RESULTS_LIMIT):
 
         # Extracts an item's title, price and URL
-        # Creates item dictionary that is added to results dictionary 
+        # Creates item dictionary that is added to results dictionary
 
         resultValue = [itemTitle[i].text, itemPrice[i].text, itemURL[i].get_attribute('href')]
         results[i] = dict(zip(LABELS,resultValue))
@@ -196,7 +209,7 @@ def getEbayItem(item, webDriver):
 def email_format(*itemInfo):
     """Formats iteminfo into a string
 
-    Args: 
+    Args:
         itemInfo: an array of arguments from different websites
         that is tuple format formatted as a dictionary containing list of related items
 
@@ -209,20 +222,20 @@ def email_format(*itemInfo):
     strFormat = ''
 
     for websiteQuery in itemInfo:
-        strFormat += f'{websiteQuery[0]}\n' 
+        strFormat += f'{websiteQuery[0]}\n'
 
         for key,value in websiteQuery[1].items():
-            strFormat += f'{key + 1}\n' 
+            strFormat += f'{key + 1}\n'
 
-            for itemKey, itemValue in value.items(): 
+            for itemKey, itemValue in value.items():
                 strFormat += f'{itemKey} : {itemValue}\n'
 
             strFormat += '\n\n'
-    
+
     return strFormat
 
 def send_email(receiver, messageSub, messageBody):
-    """Sends 
+    """Sends
 
     Args:
         receiver: email of receiver
@@ -233,8 +246,8 @@ def send_email(receiver, messageSub, messageBody):
 
     """
 
-    SENDER_EMAIL = os.getenv('SENDER_EMAIL') 
-    SENDER_PASSWORD = os.getenv('SENDER_PASSWORD') 
+    SENDER_EMAIL = os.getenv('SENDER_EMAIL')
+    SENDER_PASSWORD = os.getenv('SENDER_PASSWORD')
 
     if SENDER_EMAIL and SENDER_PASSWORD: # Checking that environment variables are set
         print('Sending Email....')
@@ -244,7 +257,7 @@ def send_email(receiver, messageSub, messageBody):
             smtp.starttls()
             smtp.login(SENDER_EMAIL, SENDER_PASSWORD)
 
-            message = f"Subject: {messageSub} \n\n {messageBody}"
+            message = f"Subject: {messageSub} \n\n {messageBody} \n\n Powered by Dev-Dominic"
             smtp.sendmail('dominichenrywork@hotmail.com', receiver, message.encode('utf-8'))
 
     else:
@@ -259,19 +272,19 @@ if __name__ == "__main__":
 
     webDriver = getWebDriver() # webDriver init
 
-    if webDriver != None: 
+    if webDriver != None:
 
         ## Querying each website
 
         print('Querying Amazon....')
-        amazonQuery = getAmazonItem(itemQuery, webDriver) 
+        amazonQuery = getAmazonItem(itemQuery, webDriver)
 
         print('Querying Ebay....')
         ebayQuery = getEbayItem(itemQuery, webDriver)
 
         # Formatting information for email
 
-        strFormat = email_format(('Amazon', amazonQuery), ('Ebay',ebayQuery)) 
+        strFormat = email_format(('Amazon', amazonQuery), ('Ebay',ebayQuery))
 
         send_email(receiver_email, itemQuery, strFormat)
         webDriver.close()
